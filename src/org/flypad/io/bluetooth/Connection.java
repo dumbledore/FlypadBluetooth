@@ -9,7 +9,7 @@ package org.flypad.io.bluetooth;
  *
  * @author albus
  */
-public interface Connection extends DataListener {
+public interface Connection extends BluetoothListener {
     public void send(byte[] data);
     public void close();
 }

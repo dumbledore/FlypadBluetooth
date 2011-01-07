@@ -16,12 +16,12 @@ import javax.microedition.io.StreamConnection;
  */
 class Reception extends OneWayConnection {
 
-    private final DataListener dataListner;
+    private final BluetoothListener dataListner;
     
     public Reception(
             final TwoWayConnection root,
             final StreamConnection connection,
-            final DataListener dataListener
+            final BluetoothListener dataListener
             ) {
         super(root, connection);
         this.dataListner = dataListener;

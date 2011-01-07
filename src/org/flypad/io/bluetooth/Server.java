@@ -13,7 +13,6 @@ import javax.bluetooth.RemoteDevice;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import javax.microedition.io.StreamConnectionNotifier;
-import org.flypad.util.log.Logger;
 
 /**
  *
@@ -30,14 +29,12 @@ public class Server extends ManagedConnection {
     private final StreamConnectionNotifier connectionNotifier;
     private final ClientDiscoverer discoverer = new ClientDiscoverer(this);
 
-    public Server(
-            final DataListener dataListener,
-            final Logger logger)
+    public Server(final BluetoothListener dataListener)
             throws IOException {
 
-        super(dataListener, logger);
+        super(dataListener);
 
-        logger.log("Creating server...");
+        infoMessage("Creating server...");
         /*
          * Retrieve the local device to get the Bluetooth Manager
          */
@@ -46,19 +43,15 @@ public class Server extends ManagedConnection {
         /*
          * Servers set the discoverable mode to GIAC
          */
-        logger.log("Setting GIAC...");
+        infoMessage("Setting GIAC...");
         localDevice.setDiscoverable(DiscoveryAgent.GIAC);
 
         /*
          * Create a server connection (a notifier)
          */
         connectionNotifier = (StreamConnectionNotifier) Connector.open(connURL);
-        logger.log("Server is running...");
+        infoMessage("Server is running...");
         discoverer.start();
-    }
-
-    public final void terminated() {
-        logger.log("Connection terminated.");
     }
 
     public final void close() {
@@ -79,19 +72,20 @@ public class Server extends ManagedConnection {
                     /*
                      * Accept a new client connection
                      */
-                    logger.log("Awaiting client connection...");
-                    StreamConnection client = connectionNotifier.acceptAndOpen();
+                    infoMessage("Awaiting client connection...");
+                    StreamConnection client =
+                            connectionNotifier.acceptAndOpen();
 
                     /*
                      * Get a handle on the connection
                      */
                     RemoteDevice remote = RemoteDevice.getRemoteDevice(client);
-                    logger.log("New client connection to "
+                    infoMessage("New client connection to "
                             + remote.getFriendlyName(false));
 
-                    connection = new TwoWayConnection(server, client, server);
+                    connect(server, client);
                 } catch (IOException e) {
-                    logger.log(e.toString());
+                    errorMessage(e.toString());
                 }
             }
         }

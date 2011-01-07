@@ -9,6 +9,10 @@ package org.flypad.io.bluetooth;
  *
  * @author albus
  */
-public interface DataListener {
+public interface BluetoothListener {
     public void receive(byte[] data);
+    public void connected();
+    public void lostConnection();
+    public void infoMessage(String message);
+    public void errorMessage(String message);
 }

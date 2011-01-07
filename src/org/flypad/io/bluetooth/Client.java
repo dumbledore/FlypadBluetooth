@@ -11,7 +11,6 @@ import javax.bluetooth.LocalDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
-import org.flypad.util.log.Logger;
 
 /**
  *
@@ -22,11 +21,10 @@ public class Client extends ManagedConnection {
     private ServerDiscoverer serverDiscoverer;
     
     public Client(
-            final DataListener dataListener,
-            final Logger logger)
+            final BluetoothListener bluetoothListener)
             throws IOException {
 
-        super(dataListener, logger);
+        super(bluetoothListener);
         /*
          * Retrieve the local device to get to the Bluetooth Manager
          */
@@ -37,12 +35,13 @@ public class Client extends ManagedConnection {
          */
         discoveryAgent = localDevice.getDiscoveryAgent();
 
-        logger.log("Client created.");
+        bluetoothListener.infoMessage("Client created.");
 
         connect();
     }
 
     public void terminated() {
+        super.terminated();
         connect();
     }
 
@@ -50,7 +49,7 @@ public class Client extends ManagedConnection {
         if (
                 serverDiscoverer != null
                 && serverDiscoverer.isWorking()) {
-            logger.log("already searching");
+            infoMessage("already searching");
             return;
         }
 
@@ -70,26 +69,23 @@ public class Client extends ManagedConnection {
             
             try {
                 while (url == null) {
-                    logger.log("Searching for host...");
+                    infoMessage("Searching for host...");
                     url = discoveryAgent.selectService(
                             serviceUUID,
                             ServiceRecord.NOAUTHENTICATE_NOENCRYPT,
                             false);
 
                     if (url == null) {
-                        logger.log("Couldn't find host");
+                        infoMessage("Couldn't find host");
                     }
                 }
 
-                logger.log("Host found. Connecting...");
-                logger.log(url);
+                infoMessage("Host found. Connecting...");
+                infoMessage(url);
 
-                StreamConnection sc = (StreamConnection) Connector.open(url);
-                logger.log("Connected!");
-
-                connection = new TwoWayConnection(client, sc, client);
+                connect(client, (StreamConnection) Connector.open(url));
             } catch (IOException e) {
-                logger.log(e.getMessage());
+                errorMessage(e.toString());
             }
         }
     }

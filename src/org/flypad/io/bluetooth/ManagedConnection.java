@@ -8,13 +8,13 @@ package org.flypad.io.bluetooth;
 import javax.bluetooth.DiscoveryAgent;
 import javax.bluetooth.LocalDevice;
 import javax.bluetooth.UUID;
-import org.flypad.util.log.Logger;
+import javax.microedition.io.StreamConnection;
 
 /**
  *
  * @author albus
  */
-abstract class ManagedConnection
+ abstract class ManagedConnection
         implements Connection, TerminationListener {
     /**
      * Bluetooth Service name
@@ -26,7 +26,6 @@ abstract class ManagedConnection
      */
     protected static final String SERVICE_UUID =
             "8b58b6b2c6c749a6b154bf81033aa702";
-//            "2d26618601fb47c28d9f10b8ec891363";
 
     protected UUID serviceUUID = new UUID(SERVICE_UUID, false);
 
@@ -42,15 +41,11 @@ abstract class ManagedConnection
      */
     protected DiscoveryAgent discoveryAgent;
 
-    protected final DataListener dataListener;
-    protected TwoWayConnection connection;
-    protected final Logger logger;
+    private final BluetoothListener bluetoothListener;
+    private TwoWayConnection connection;
 
-    public ManagedConnection(
-            final DataListener dataListener,
-            final Logger logger) {
-        this.dataListener = dataListener;
-        this.logger = logger;
+    public ManagedConnection(final BluetoothListener bluetoothListener) {
+        this.bluetoothListener = bluetoothListener;
     }
 
     public void send(byte[] data) {
@@ -60,12 +55,37 @@ abstract class ManagedConnection
     }
 
     public void receive(byte[] data) {
-        dataListener.receive(data);
+        bluetoothListener.receive(data);
     }
 
+    public void infoMessage(String message) {
+        bluetoothListener.infoMessage(message);
+    }
+
+    public void errorMessage(String message) {
+        bluetoothListener.errorMessage(message);
+    }
+
+    public void connected() {
+        bluetoothListener.connected();
+    }
+
+    public void lostConnection() {
+        bluetoothListener.lostConnection();
+    }
+
+    protected void connect(final ManagedConnection mc,
+            final StreamConnection sc) {
+        connection = new TwoWayConnection(mc, sc);
+        connected();
+    }
     public void close() {
         if (connection != null) {
             connection.close();
         }
+    }
+
+    public void terminated() {
+        bluetoothListener.lostConnection();
     }
 }

@@ -16,15 +16,12 @@ class TwoWayConnection
     private final ManagedConnection managedConnection;
     private final Reception reception;
     private final Transmission transmission;
-    private final DataListener dataListener;
 
     public TwoWayConnection(
             final ManagedConnection managedConnection,
-            final StreamConnection connection,
-            final DataListener dataListener) {
+            final StreamConnection connection) {
 
         this.managedConnection = managedConnection;
-        this.dataListener = dataListener;
 
         reception = new Reception(this, connection, this);
         reception.start();
@@ -38,7 +35,23 @@ class TwoWayConnection
     }
 
     public final void receive(byte[] data) {
-        dataListener.receive(data);
+        managedConnection.receive(data);
+    }
+
+    public void connected() {
+        managedConnection.connected();
+    }
+
+    public void lostConnection() {
+        managedConnection.lostConnection();
+    }
+
+    public void infoMessage(String message) {
+        managedConnection.infoMessage(message);
+    }
+
+    public void errorMessage(String message) {
+        managedConnection.errorMessage(message);
     }
 
     public final void terminated() {
